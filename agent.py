@@ -3,8 +3,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import feedparser
-from google import genai
-from google.genai import types
+import openai
 
 def fetch_uae_news():
     """Fetches recent UAE finance, tax, and audit news from Google News RSS."""
@@ -26,13 +25,13 @@ def fetch_uae_news():
     return "\n\n".join(articles)
 
 def summarize_news(news_text):
-    """Uses Gemini 1.5 Flash to summarize the news text into a 3-point newsletter."""
-    print("Summarizing news with Gemini 1.5 Flash...")
-    api_key = os.environ.get("GEMINI_API_KEY")
+    """Uses OpenAI to summarize the news text into a 3-point newsletter."""
+    print("Summarizing news with OpenAI...")
+    api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
-        raise ValueError("GEMINI_API_KEY environment variable is not set.")
+        raise ValueError("OPENAI_API_KEY environment variable is not set.")
 
-    client = genai.Client(api_key=api_key)
+    client = openai.OpenAI(api_key=api_key)
     
     prompt = f"""
     You are an expert financial analyst and newsletter editor specializing in the UAE region.
@@ -52,12 +51,15 @@ def summarize_news(news_text):
     {news_text}
     """
     
-    response = client.models.generate_content(
-        model='gemini-2.0-flash',
-        contents=prompt,
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ]
     )
     
-    return response.text
+    return response.choices[0].message.content
 
 def send_email(html_content):
     """Sends the summarized newsletter via Gmail SMTP."""
