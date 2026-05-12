@@ -52,7 +52,7 @@ def summarize_news(news_text):
     """
     
     response = client.chat.completions.create(
-        model="grok-2-latest",
+        model="grok-beta",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
