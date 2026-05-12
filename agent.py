@@ -37,15 +37,20 @@ def summarize_news(news_text):
     You are an expert financial analyst and newsletter editor specializing in the UAE region.
     I will provide you with a list of recent news article titles and links related to UAE finance, tax, and audit.
     
-    Your task is to summarize this information into a professional, engaging 3-point newsletter.
+    Your task is to summarize this information into a professional newsletter.
     
     Rules:
-    1. Extract the 3 most important and impactful themes or stories from the provided news.
-    2. Write a concise, professional paragraph for each point.
-    3. Include 1-2 relevant source links at the end of each point (use markdown format `[Source](url)`).
-    4. Provide the output in clean HTML format suitable for an email body (do not include ```html blocks, just the HTML tags).
-    5. Start with a brief, professional greeting.
-    6. Ensure the tone is objective and informative.
+    1. Start the email EXACTLY with: "Dear Hafiz Abbas,<br><br>"
+    2. Extract the 3 most important and impactful themes or stories from the provided news.
+    3. For each of the 3 stories, format it exactly like a professional LinkedIn post:
+       - Provide a short, engaging 1-2 sentence introductory paragraph explaining the news.
+       - Add a blank line, then write "This gives companies an opportunity to:" (or something similar depending on the context).
+       - Provide 3-4 bullet points extracting the key details, using the '✅' emoji instead of standard bullet points.
+       - Provide a short concluding sentence.
+       - Add relevant hashtags (e.g., #UAE #Finance #Tax).
+       - Include the source link at the bottom of the story.
+    4. Provide the output in clean HTML format suitable for an email body (do not include ```html blocks, just the raw HTML tags, and use <br> for line breaks).
+    5. Ensure the tone is objective, professional, and informative.
     
     Here is the news data:
     {news_text}
