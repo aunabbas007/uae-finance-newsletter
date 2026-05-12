@@ -40,16 +40,17 @@ def summarize_news(news_text):
     Your task is to summarize this information into a professional newsletter.
     
     Rules:
-    1. Start the email EXACTLY with: "Dear Hafiz Abbas,<br><br>"
+    1. Start the email EXACTLY with: "Dear Hafiz Abbas," followed by two blank lines.
     2. Extract the 3 most important and impactful themes or stories from the provided news.
     3. For each of the 3 stories, format it exactly like a professional LinkedIn post:
        - Provide a short, engaging 1-2 sentence introductory paragraph explaining the news.
        - Add a blank line, then write "This gives companies an opportunity to:" (or something similar depending on the context).
-       - Provide 3-4 bullet points extracting the key details, using the '✅' emoji instead of standard bullet points.
-       - Provide a short concluding sentence.
-       - Add relevant hashtags (e.g., #UAE #Finance #Tax).
-       - Include the source link at the bottom of the story.
-    4. Provide the output in clean HTML format suitable for an email body (do not include ```html blocks, just the raw HTML tags, and use <br> for line breaks).
+       - Add a blank line, then provide 3-4 bullet points extracting the key details. Start each bullet point on a NEW LINE with the '✅' emoji.
+       - Add a blank line, then provide a short concluding sentence.
+       - Add a blank line, then add relevant hashtags (e.g., #UAE #Finance #Tax).
+       - Add a blank line, then include the source link.
+       - Add a clear separator (like "----------------------------------------") before the next story.
+    4. Provide the output in plain text. DO NOT use any HTML tags. Use standard newlines to create spacing.
     5. Ensure the tone is objective, professional, and informative.
     
     Here is the news data:
@@ -64,7 +65,15 @@ def summarize_news(news_text):
         ]
     )
     
-    return response.choices[0].message.content
+    raw_content = response.choices[0].message.content
+    
+    # Convert plain text newlines to HTML line breaks so it renders correctly in the email client
+    html_formatted = raw_content.replace('\n', '<br>')
+    
+    # Wrap in a clean, professional font style
+    final_html = f"<div style='font-family: Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #1a1a1a; max-width: 800px; margin: 0 auto;'>{html_formatted}</div>"
+    
+    return final_html
 
 def send_email(html_content):
     """Sends the summarized newsletter via Gmail SMTP."""
