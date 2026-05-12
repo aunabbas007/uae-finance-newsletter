@@ -1,0 +1,33 @@
+name: Daily UAE Finance & Tax Newsletter
+
+on:
+  schedule:
+    # Run at 05:00 UTC every day (which is 10:30 AM IST)
+    - cron: '0 5 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Newsletter Agent
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GMAIL_USER: ${{ secrets.GMAIL_USER }}
+        GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        EMAIL_RECEIVER: "mhmdhfizabbas@gmail.com"
+      run: python agent.py
