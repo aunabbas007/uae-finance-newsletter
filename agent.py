@@ -25,13 +25,13 @@ def fetch_uae_news():
     return "\n\n".join(articles)
 
 def summarize_news(news_text):
-    """Uses Grok to summarize the news text into a 3-point newsletter."""
-    print("Summarizing news with Grok...")
-    api_key = os.environ.get("GROK_API_KEY")
+    """Uses Groq to summarize the news text into a 3-point newsletter."""
+    print("Summarizing news with Groq...")
+    api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
-        raise ValueError("GROK_API_KEY environment variable is not set.")
+        raise ValueError("GROQ_API_KEY environment variable is not set.")
 
-    client = openai.OpenAI(api_key=api_key, base_url="https://api.x.ai/v1")
+    client = openai.OpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1")
     
     prompt = f"""
     You are an expert financial analyst and newsletter editor specializing in the UAE region.
@@ -52,7 +52,7 @@ def summarize_news(news_text):
     """
     
     response = client.chat.completions.create(
-        model="grok-4.3",
+        model="llama3-8b-8192",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
