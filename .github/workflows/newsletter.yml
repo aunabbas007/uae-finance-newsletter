@@ -2,8 +2,8 @@ name: Daily UAE Finance & Tax Newsletter
 
 on:
   schedule:
-    # Run at 05:00 UTC every day (which is 10:30 AM IST)
-    - cron: '0 5 * * *'
+    # 04:45 UTC is 10:15 AM IST. Running at minute 45 avoids GitHub Actions top-of-hour queue delays.
+    - cron: '45 4 * * *'
   workflow_dispatch: # Allow manual triggering
 
 jobs:
