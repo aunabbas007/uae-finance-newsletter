@@ -1,4 +1,5 @@
 import os
+import sys
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -10,10 +11,20 @@ def fetch_uae_news():
     print("Fetching news from Google News RSS...")
     # Search query targeting UAE and finance/tax/audit topics in the last 24 hours
     query = "UAE+finance+OR+tax+OR+audit+when:1d"
-    url = f"https://news.google.com/rss/search?q={query}"
+    url = f"https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
     
-    feed = feedparser.parse(url)
+    # Use a browser-like User-Agent to avoid being blocked by Google News
+    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    feed = feedparser.parse(url, agent=user_agent)
     
+    # Check for HTTP status codes indicating failure (e.g. 403 Forbidden, 429 Too Many Requests)
+    if hasattr(feed, 'status') and feed.status >= 400:
+        raise RuntimeError(f"Google News RSS returned status code {feed.status}")
+        
+    # Check for parsing errors if no entries could be recovered
+    if feed.bozo and not feed.entries:
+        raise RuntimeError(f"Failed to parse RSS feed: {feed.get('bozo_exception', 'Unknown parse error')}")
+        
     articles = []
     # Limit to top 30 articles to avoid sending too much context to the LLM
     for entry in feed.entries[:30]:
@@ -83,10 +94,7 @@ def send_email(html_content):
     receiver_email = os.environ.get("EMAIL_RECEIVER", "mhmdhfizabbas@gmail.com")
     
     if not sender_email or not sender_password:
-        print("WARNING: GMAIL_USER or GMAIL_APP_PASSWORD environment variables not set. Email will not be sent.")
-        print("Generated Newsletter Content:\n")
-        print(html_content)
-        return
+        raise ValueError("GMAIL_USER or GMAIL_APP_PASSWORD environment variables are not set.")
 
     msg = MIMEMultipart("alternative")
     msg['Subject'] = "Daily UAE Finance & Tax Update"
@@ -96,14 +104,11 @@ def send_email(html_content):
     part = MIMEText(html_content, 'html')
     msg.attach(part)
 
-    try:
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-            server.starttls()
-            server.login(sender_email, sender_password)
-            server.sendmail(sender_email, receiver_email, msg.as_string())
-        print(f"Email sent successfully to {receiver_email}!")
-    except Exception as e:
-        print(f"Failed to send email: {e}")
+    with smtplib.SMTP('smtp.gmail.com', 587) as server:
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, receiver_email, msg.as_string())
+    print(f"Email sent successfully to {receiver_email}!")
 
 if __name__ == "__main__":
     try:
@@ -115,3 +120,4 @@ if __name__ == "__main__":
             send_email(summary_html)
     except Exception as e:
         print(f"An error occurred: {e}")
+        sys.exit(1)
