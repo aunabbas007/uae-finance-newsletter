@@ -104,11 +104,15 @@ def send_email(html_content):
     part = MIMEText(html_content, 'html')
     msg.attach(part)
 
-    with smtplib.SMTP('smtp.gmail.com', 587) as server:
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, receiver_email, msg.as_string())
-    print(f"Email sent successfully to {receiver_email}!")
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+        print(f"Email sent successfully to {receiver_email}!")
+    except smtplib.SMTPAuthenticationError as e:
+        print("SMTPAuthenticationError: SMTP authentication failed. Please ensure GMAIL_USER is the full email and GMAIL_APP_PASSWORD is a valid App Password (2FA must be enabled on your Google account).")
+        raise
 
 if __name__ == "__main__":
     try:

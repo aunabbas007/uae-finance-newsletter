@@ -24,6 +24,42 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Verify credentials
+      env:
+        GMAIL_USER: ${{ secrets.GMAIL_USER }}
+        GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      run: |
+        python - <<'PY'
+        import os, smtplib, sys
+        user = os.getenv("GMAIL_USER")
+        pw = os.getenv("GMAIL_APP_PASSWORD")
+        groq_key = os.getenv("GROQ_API_KEY")
+        
+        if not groq_key:
+            print("ERROR: GROQ_API_KEY secret is missing.")
+            sys.exit(1)
+            
+        if not user or not pw:
+            print("ERROR: GMAIL_USER or GMAIL_APP_PASSWORD secret is missing.")
+            sys.exit(1)
+            
+        try:
+            s = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
+            s.ehlo()
+            s.starttls()
+            s.login(user, pw)
+            s.quit()
+        except smtplib.SMTPAuthenticationError:
+            print("ERROR: SMTP authentication failed. Check that GMAIL_USER is the full email and GMAIL_APP_PASSWORD is a valid App Password (2FA required).")
+            sys.exit(1)
+        except Exception as e:
+            print("ERROR: SMTP check failed:", e)
+            sys.exit(1)
+            
+        print("Credentials verified successfully.")
+        PY
+
     - name: Run Newsletter Agent
       env:
         GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
